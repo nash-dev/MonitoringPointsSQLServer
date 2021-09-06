@@ -1,0 +1,10 @@
+Insert into Threshold(RecordID, ThresholdLimit, ThresholdLimitPassed,ThresholdMailAlertSent)
+VAlUES (1, 30, 0, 0);
+
+
+Insert into Action (RecordID, Action)
+Values(1, 'No Action')
+Insert into Action (RecordID, Action)
+Values(2, 'Sent Alarm')
+Insert into Action (RecordID, Action)
+Values(3, 'Sent Alarm Cancel');

@@ -1,0 +1,28 @@
+USE [CCN_BMS]
+GO
+/****** Object:  StoredProcedure [dbo].[sprMonitoringPointsUpdate]    Script Date: 7/4/2017 11:14:23 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+
+
+ALTER PROCEDURE [dbo].[sprMonitoringPointsUpdate] 
+
+AS
+
+--Update the points parent location
+update dbo.MonitoringPoints
+set ParentLocation = (select top 1 itemName from JCIEvents.dbo.tblItem  where itemFullyQualifiedReference = (select top 1 Substring(itemFullyQualifiedReference, 0 ,LEN(itemFullyQualifiedReference) - CHARINDEX('.', REVERSE(itemFullyQualifiedReference)) + 1) 
+from JCIEvents.dbo.tblItem where JCIEvents.dbo.tblItem.itemFullyQualifiedReference = dbo.MonitoringPoints.itemFullyQualifiedReference))
+from dbo.MonitoringPoints
+
+
+
+--Update actual location in case its changed on JCI
+update dbo.MonitoringPoints
+set Location = isnull((select top 1 itemName from JCIEvents.dbo.tblItem where JCIEvents.dbo.tblItem.itemFullyQualifiedReference = dbo.MonitoringPoints.itemFullyQualifiedReference
+and JCIEvents.dbo.tblItem.itemFullyQualifiedReference not in ('Metasys','NAE552','Temp Alarm','AV1') order by JCIEvents.dbo.tblItem.itemId desc),'')
+from dbo.MonitoringPoints 

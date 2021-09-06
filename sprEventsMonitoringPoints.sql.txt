@@ -1,0 +1,45 @@
+USE [CCN_BMS]
+GO
+/****** Object:  StoredProcedure [dbo].[sprEventsMonitoringPoints]    Script Date: 7/4/2017 11:12:01 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[sprEventsMonitoringPoints] 
+
+AS
+
+
+with mycte ([LastEventID], [itemFullyQualifiedReference])
+AS
+(
+select 
+[LastEventID]=max(e.eventid)
+,i.itemFullyQualifiedReference
+from JCIEvents.dbo.tblEvent e
+inner join JCIEvents.dbo.tblItem i on i.itemid = e.itemid
+inner join dbo.MonitoringPoints mp on mp.itemFullyQualifiedReference = i.itemFullyQualifiedReference
+group by i.[itemFullyQualifiedReference]
+)
+
+
+update dbo.MonitoringPoints
+--set isAlarmState = (select (case when i.[sendCommandReference] = '' then 0 else 1 end) from JCIEvents.dbo.tblItem i where i.itemid = ct.itemid),
+set [LastEventDate] = (select ev.[utcDetectionDateTime] from JCIEvents.dbo.tblEvent ev where ev.eventId = ct.[LastEventID]),
+[LastEventID] = ct.[LastEventID],
+isAlarmState = (select (case when ev2.[currentStatusEnumInfoId] = 2 then 0 else 1 end) from JCIEvents.dbo.tblEvent ev2 where ev2.eventId = ct.[LastEventID])
+from mycte ct
+where dbo.MonitoringPoints.itemFullyQualifiedReference = ct.itemFullyQualifiedReference
+
+/*
+update dbo.MonitoringPoints 
+set isAlarmState = (select (case when i.[sendCommandReference] = '' then 0 else 1 end) from JCIEvents.dbo.tblItem i where i.itemid = ev.itemid)
+--select * 
+from JCIEvents.dbo.tblEvent ev
+inner join dbo.MonitoringPoints mp on mp.[LastEventID] = ev.eventid
+--set isAlarmState = (select (case when i.[sendCommandReference] = '' then 0 else 1 end) from JCIEvents.dbo.tblItem i where i.itemid = ct.itemid)
+
+--update [CCN_BMS].[dbo].[MonitoringPoints] set AlarmStart = null, isAlarmState = 0,  [LastEventID]=null, [LastEventDate]=null
+
+*/

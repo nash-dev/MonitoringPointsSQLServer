@@ -1,0 +1,26 @@
+USE [CCN_BMS]
+GO
+/****** Object:  StoredProcedure [dbo].[sprMonitoringPointsLearn]    Script Date: 7/4/2017 11:13:45 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+
+ALTER PROCEDURE [dbo].[sprMonitoringPointsLearn] 
+
+AS
+
+with mycte ([itemFullyQualifiedReference]) 
+AS (
+select distinct jci.[itemFullyQualifiedReference] FROM [JCIEvents].[dbo].[tblItem] jci where [itemName] <> 'Metasys'  and  itemFullyQualifiedReference <> 'Metasys:NAE552/AV1' group by jci.itemFullyQualifiedReference
+EXCEPT
+select ccn.[itemFullyQualifiedReference] from CCN_BMS.[dbo].[MonitoringPoints] ccn 
+)
+
+INSERT INTO CCN_BMS.[dbo].[MonitoringPoints] ([itemFullyQualifiedReference],[AllowedDowntime],[Enabled],[IsAlarmState],[LastEventID],[LastEventDate],[LastActionID],[Priority],[Location],[Equipment])	
+select 
+cte.[itemFullyQualifiedReference],5,1,0,0,null,1,1,[itemName] = ISNULL(NULLIF(max(jci.[itemDescription]), ''), max(jci.[itemName])),'Unknown' 
+from mycte cte
+inner join [JCIEvents].[dbo].[tblItem] jci on jci.[itemFullyQualifiedReference] = cte.[itemFullyQualifiedReference]
+group by cte.itemFullyQualifiedReference

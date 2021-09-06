@@ -1,0 +1,71 @@
+USE [CCN_BMS]
+GO
+
+/****** Object:  Table [dbo].[MonitoringPoints]    Script Date: 7/4/2017 11:18:19 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[MonitoringPoints](
+	[RecordID] [int] IDENTITY(1,1) NOT NULL,
+	[itemFullyQualifiedReference] [nvarchar](400) NOT NULL,
+	[AllowedDowntime] [smallint] NOT NULL,
+	[Enabled] [bit] NOT NULL,
+	[IsAlarmState] [bit] NULL,
+	[LastEventID] [int] NULL,
+	[LastEventDate] [datetime] NULL,
+	[LastActionID] [int] NULL,
+	[Priority] [int] NOT NULL,
+	[Location] [nvarchar](255) NOT NULL,
+	[Equipment] [nvarchar](255) NULL,
+	[ParentLocation] [nvarchar](255) NULL,
+	[CameraKey] [int] NULL,
+ CONSTRAINT [PK_MonitoringPoints] PRIMARY KEY CLUSTERED 
+(
+	[RecordID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_AllowedDowntime]  DEFAULT ((10)) FOR [AllowedDowntime]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_Enabled]  DEFAULT ((0)) FOR [Enabled]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_IsAlarmState]  DEFAULT ((0)) FOR [IsAlarmState]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_LastEventID]  DEFAULT ((0)) FOR [LastEventID]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_LastActionID]  DEFAULT ((1)) FOR [LastActionID]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_Priority]  DEFAULT ((0)) FOR [Priority]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_Location]  DEFAULT ('') FOR [Location]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] ADD  CONSTRAINT [DF_MonitoringPoints_Equipment]  DEFAULT ('') FOR [Equipment]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints]  WITH CHECK ADD  CONSTRAINT [FK_MonitoringPoints_Action] FOREIGN KEY([LastActionID])
+REFERENCES [dbo].[Action] ([RecordID])
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] CHECK CONSTRAINT [FK_MonitoringPoints_Action]
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints]  WITH CHECK ADD  CONSTRAINT [FK_MonitoringPoints_Cameras] FOREIGN KEY([CameraKey])
+REFERENCES [dbo].[Cameras] ([PK])
+GO
+
+ALTER TABLE [dbo].[MonitoringPoints] CHECK CONSTRAINT [FK_MonitoringPoints_Cameras]
+GO
+
+
